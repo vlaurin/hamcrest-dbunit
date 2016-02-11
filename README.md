@@ -1,2 +1,2 @@
 # hamcrest-dbunit
-A DBUnit matching library for Java Hamcrest.
+Library of matchers for [DbUnit](http://dbunit.sourceforge.net/) based on [Java Hamcrest](https://github.com/hamcrest/JavaHamcrest).
