@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dataset>
+    <user_table
+            id="1"
+            username="jsnow"
+            email="jsnow@nightwatch"
+    />
+    <user_table
+            id="2"
+            username="jlannister"
+            email="jlannister@kingsguard"
+    />
+    <not_row_count_user_table
+            id="1"
+            username="jsnow"
+            email="jsnow@nightwatch"
+    />
+    <not_column_diff_user_table
+            username="jsnow"
+            email="jsnow@nightwatch"
+    />
+    <not_column_diff_user_table
+            username="jlannister"
+            email="jlannister@kingsguard"
+    />
+    <not_data_user_table
+            id="1"
+            username="jsnow"
+            email="jsnow@nightwatch"
+    />
+    <not_data_user_table
+            id="2"
+            username="clannister"
+            email="clannister@regent"
+    />
+</dataset>
