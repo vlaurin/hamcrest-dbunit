@@ -14,7 +14,7 @@ import static org.mockito.Mockito.mock;
 
 
 /**
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class IsEqualTest extends DbUnitMatcherTest {
 

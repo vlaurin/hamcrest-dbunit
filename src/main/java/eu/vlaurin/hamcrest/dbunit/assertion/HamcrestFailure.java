@@ -9,7 +9,7 @@ import org.dbunit.dataset.ITable;
  *
  * @see junit.framework.ComparisonFailure
  * @see HamcrestDbUnitAssert
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class HamcrestFailure extends AssertionError {
     private final String expected;

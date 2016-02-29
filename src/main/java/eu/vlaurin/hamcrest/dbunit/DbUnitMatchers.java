@@ -7,13 +7,12 @@ import org.hamcrest.Matcher;
 /**
  * Provides easy access to all the matchers defined in <strong>hamcrest-dbunit</strong>.
  *
- * @since 1.0.0
+ * @since 0.1.0
  */
 public class DbUnitMatchers {
 
     /**
-     * Creates an {@link IsEqual} matcher of {@link ITable} that matches when two DbUnit tables are equal.
-     * For example:
+     * Creates an {@link IsEqual} matcher of {@link ITable} that matches when two DbUnit tables are equal. For example:
      * <pre>
      *     ITable actualTable = ...;
      *     ITable expectedTable = ...;

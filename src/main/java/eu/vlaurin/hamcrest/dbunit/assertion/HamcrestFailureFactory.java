@@ -9,7 +9,7 @@ import org.dbunit.assertion.FailureFactory;
  * @see FailureFactory
  * @see HamcrestDbUnitAssert
  * @see HamcrestFailure
- * @since 1.0.0
+ * @since 0.1.0
  */
 class HamcrestFailureFactory implements FailureFactory {
     public Error createFailure(String message, String expected, String actual) {

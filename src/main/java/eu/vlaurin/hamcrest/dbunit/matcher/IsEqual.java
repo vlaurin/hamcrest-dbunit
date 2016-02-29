@@ -16,7 +16,7 @@ import org.hamcrest.TypeSafeMatcher;
  * Matches DbUnit tables equal to the expected table (rows, columns and data).
  *
  * @see ITable
- * @since 1.0.0
+ * @since 0.1.0
  */
 public final class IsEqual extends TypeSafeMatcher<ITable> {
 
@@ -100,8 +100,7 @@ public final class IsEqual extends TypeSafeMatcher<ITable> {
     }
 
     /**
-     * Creates an {@link IsEqual} matcher of {@link ITable} that matches when two DbUnit tables are equal.
-     * For example:
+     * Creates an {@link IsEqual} matcher of {@link ITable} that matches when two DbUnit tables are equal. For example:
      * <pre>
      *     ITable actualTable = ...;
      *     ITable expectedTable = ...;
