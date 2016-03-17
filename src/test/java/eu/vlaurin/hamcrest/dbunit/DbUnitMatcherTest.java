@@ -10,52 +10,19 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
  */
 public abstract class DbUnitMatcherTest {
 
-    private static final String EXPECTED_DATASET = "IsEqualTest.dataset.xml";
-    private static final String EXPECTED_TABLE_NAME = "user_table";
-    private static final String NOT_EQUAL_ROW_COUNT_TABLE_NAME = "not_row_count_user_table";
-    private static final String NOT_EQUAL_COL_DIFF_TABLE_NAME = "not_column_diff_user_table";
-    private static final String NOT_EQUAL_DATA_TABLE_NAME = "not_data_user_table";
+    private final FlatXmlDataSet dataSet;
 
-    private FlatXmlDataSet expectedDatasSet;
-
-    protected ITable createExpectedTable() {
+    public DbUnitMatcherTest(String dataSetFileName) {
         try {
-            return getExpectedDataSet().getTable(EXPECTED_TABLE_NAME);
+            dataSet = new FlatXmlDataSetBuilder().build(DbUnitMatcherTest.class.getResourceAsStream(dataSetFileName));
         } catch (DataSetException e) {
             throw new RuntimeException(e);
         }
     }
 
-    protected ITable createNotEqualTable_rowCount() {
+    protected ITable getTable(String tableName) {
         try {
-            return getExpectedDataSet().getTable(NOT_EQUAL_ROW_COUNT_TABLE_NAME);
-        } catch (DataSetException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    protected ITable createNotEqualTable_columnDiff() {
-        try {
-            return getExpectedDataSet().getTable(NOT_EQUAL_COL_DIFF_TABLE_NAME);
-        } catch (DataSetException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    protected ITable createNotEqualTable_data() {
-        try {
-            return getExpectedDataSet().getTable(NOT_EQUAL_DATA_TABLE_NAME);
-        } catch (DataSetException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private FlatXmlDataSet getExpectedDataSet() {
-        try {
-            if (null == expectedDatasSet) {
-                expectedDatasSet = new FlatXmlDataSetBuilder().build(DbUnitMatcherTest.class.getResourceAsStream(EXPECTED_DATASET));
-            }
-            return expectedDatasSet;
+            return dataSet.getTable(tableName);
         } catch (DataSetException e) {
             throw new RuntimeException(e);
         }

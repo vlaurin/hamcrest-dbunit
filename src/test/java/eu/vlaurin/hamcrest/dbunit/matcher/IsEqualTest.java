@@ -17,6 +17,15 @@ import static org.mockito.Mockito.mock;
  * @since 0.1.0
  */
 public class IsEqualTest extends DbUnitMatcherTest {
+    private static final String EXPECTED_DATASET = "IsEqualTest.dataset.xml";
+    private static final String EXPECTED_TABLE_NAME = "user_table";
+    private static final String NOT_EQUAL_ROW_COUNT_TABLE_NAME = "not_row_count_user_table";
+    private static final String NOT_EQUAL_COL_DIFF_TABLE_NAME = "not_column_diff_user_table";
+    private static final String NOT_EQUAL_DATA_TABLE_NAME = "not_data_user_table";
+
+    public IsEqualTest() {
+        super(EXPECTED_DATASET);
+    }
 
     @Test
     public void isNullSafe() {
@@ -39,23 +48,23 @@ public class IsEqualTest extends DbUnitMatcherTest {
 
     @Test
     public void describesItself() {
-        final ITable expectedTable = createExpectedTable();
+        final ITable expectedTable = getTable(EXPECTED_TABLE_NAME);
 
         assertThat(equalTo(expectedTable), hasDescription("table: name=user_table, rows=2, columns=[id, username, email]"));
     }
 
     @Test
     public void matchesEqualTables() {
-        final ITable expectedTable = createExpectedTable();
-        final ITable actualTable = createExpectedTable();
+        final ITable expectedTable = getTable(EXPECTED_TABLE_NAME);
+        final ITable actualTable = getTable(EXPECTED_TABLE_NAME);
 
         assertThat(actualTable, equalTo(expectedTable));
     }
 
     @Test
     public void doesNotMatchNotEqualTables_rowCount() {
-        final ITable expectedTable = createExpectedTable();
-        final ITable actualTable = createNotEqualTable_rowCount();
+        final ITable expectedTable = getTable(EXPECTED_TABLE_NAME);
+        final ITable actualTable = getTable(NOT_EQUAL_ROW_COUNT_TABLE_NAME);
 
         final Matcher<ITable> equalToMatcher = equalTo(expectedTable);
 
@@ -66,8 +75,8 @@ public class IsEqualTest extends DbUnitMatcherTest {
 
     @Test
     public void doesNotMatchNotEqualTables_columnDiff() {
-        final ITable expectedTable = createExpectedTable();
-        final ITable actualTable = createNotEqualTable_columnDiff();
+        final ITable expectedTable = getTable(EXPECTED_TABLE_NAME);
+        final ITable actualTable = getTable(NOT_EQUAL_COL_DIFF_TABLE_NAME);
 
         final Matcher<ITable> equalToMatcher = equalTo(expectedTable);
 
@@ -78,8 +87,8 @@ public class IsEqualTest extends DbUnitMatcherTest {
 
     @Test
     public void doesNotMatchNotEqualTables_data() {
-        final ITable expectedTable = createExpectedTable();
-        final ITable actualTable = createNotEqualTable_data();
+        final ITable expectedTable = getTable(EXPECTED_TABLE_NAME);
+        final ITable actualTable = getTable(NOT_EQUAL_DATA_TABLE_NAME);
 
         final Matcher<ITable> equalToMatcher = equalTo(expectedTable);
 
