@@ -22,7 +22,7 @@ public class DbUnitMatchers {
      *
      * @param expectedTable Not null. The expected state of the tables compared
      */
-    public static Matcher<ITable> equalTo(ITable expectedTable) {
+    public static IsEqual equalTo(ITable expectedTable) {
         return IsEqual.equalTo(expectedTable);
     }
 }

@@ -1,16 +1,17 @@
 package eu.vlaurin.hamcrest.dbunit.matcher;
 
 import eu.vlaurin.hamcrest.dbunit.DbUnitMatcherTest;
+import eu.vlaurin.hamcrest.dbunit.matcher.decorator.filtered.Filtered;
 import org.dbunit.dataset.ITable;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 
 import static eu.vlaurin.hamcrest.dbunit.DbUnitMatchers.equalTo;
 import static eu.vlaurin.hamcrest.test.TestMatchers.*;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 
 /**
@@ -95,6 +96,17 @@ public class IsEqualTest extends DbUnitMatcherTest {
         assertThat(actualTable, not(equalToMatcher));
         assertThat(equalToMatcher, hasDescription("value (table=user_table, row=1, col=email) is: \"jlannister@kingsguard\""));
         assertThat(equalToMatcher, hasMismatchDescription("value (table=user_table, row=1, col=email) was: \"clannister@regent\"", actualTable));
+    }
+
+    @Test
+    public void supportsFilteredDecorator() {
+        final ITable expectedTable = getTable(EXPECTED_TABLE_NAME);
+
+        final IsEqual equalToMatcher = equalTo(expectedTable);
+
+        final Filtered filteredMatcher = equalToMatcher.filtered();
+        assertThat(filteredMatcher, is(notNullValue()));
+        assertThat(equalToMatcher, sameInstance(filteredMatcher.getMatcher()));
     }
 
 }

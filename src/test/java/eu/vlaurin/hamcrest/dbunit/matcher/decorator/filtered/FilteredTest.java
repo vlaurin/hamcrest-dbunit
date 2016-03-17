@@ -1,6 +1,7 @@
-package eu.vlaurin.hamcrest.dbunit.matcher;
+package eu.vlaurin.hamcrest.dbunit.matcher.decorator.filtered;
 
 import eu.vlaurin.hamcrest.dbunit.DbUnitMatcherTest;
+import eu.vlaurin.hamcrest.dbunit.matcher.decorator.filtered.Filtered;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
@@ -19,6 +20,7 @@ import java.util.List;
 import static eu.vlaurin.hamcrest.test.TestMatchers.*;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
 import static org.mockito.Mockito.*;
@@ -61,19 +63,25 @@ public class FilteredTest extends DbUnitMatcherTest {
 
     @Test
     public void isNullSafe() {
-        assertThat(new Filtered(innerMatcher, mock(ITable.class)), is(nullSafe()));
+        assertThat(Filtered.filtered(innerMatcher, mock(ITable.class)), is(nullSafe()));
     }
 
     @Test
     public void isUnknownTypeSafe() {
-        assertThat(new Filtered(innerMatcher, mock(ITable.class)), is(unknownTypeSafe()));
+        assertThat(Filtered.filtered(innerMatcher, mock(ITable.class)), is(unknownTypeSafe()));
+    }
+
+    @Test
+    public void decoratesInnerMatcher() {
+        final Filtered filtered = Filtered.filtered(innerMatcher, null);
+        assertThat(filtered.getMatcher(), sameInstance(innerMatcher));
     }
 
     @Test
     public void failingInnerMatcherCausesMatcherToFail() {
         final ITable actualTable = getTable(ACTUAL_TABLE);
         final ITable expectedTable = getTable(EXPECTED_TABLE);
-        final Filtered filtered = new Filtered(innerMatcher, expectedTable);
+        final Filtered filtered = Filtered.filtered(innerMatcher, expectedTable);
 
         assertThat(filtered.matches(actualTable), is(false));
         verify(innerMatcher).matches(any());
@@ -85,7 +93,7 @@ public class FilteredTest extends DbUnitMatcherTest {
         final ITable expectedTable = getTable(EXPECTED_TABLE);
         final Matcher<ITable> successfulMatcher = mock(Matcher.class);
         when(successfulMatcher.matches(any())).thenReturn(true);
-        final Filtered filtered = new Filtered(successfulMatcher, expectedTable);
+        final Filtered filtered = Filtered.filtered(successfulMatcher, expectedTable);
 
         assertThat(filtered.matches(actualTable), is(true));
         verify(successfulMatcher).matches(any());
@@ -94,7 +102,7 @@ public class FilteredTest extends DbUnitMatcherTest {
     @Test
     public void describesItselfUsingInnerMatcher() {
         final ITable expectedTable = getTable(EXPECTED_TABLE);
-        final Filtered filtered = new Filtered(innerMatcher, expectedTable);
+        final Filtered filtered = Filtered.filtered(innerMatcher, expectedTable);
 
         assertThat(filtered, hasDescription("filtered: inner description"));
         verify(innerMatcher).describeTo(Mockito.any(Description.class));
@@ -104,7 +112,7 @@ public class FilteredTest extends DbUnitMatcherTest {
     public void describesMismatchUsingInnerMatcher() {
         final ITable actualTable = getTable(ACTUAL_TABLE);
         final ITable expectedTable = getTable(EXPECTED_TABLE);
-        final Filtered filtered = new Filtered(innerMatcher, expectedTable);
+        final Filtered filtered = Filtered.filtered(innerMatcher, expectedTable);
 
         assertThat(filtered, hasMismatchDescription("filtered: inner mismatch", actualTable));
         verify(innerMatcher).describeMismatch(any(), Mockito.any(Description.class));
@@ -118,7 +126,7 @@ public class FilteredTest extends DbUnitMatcherTest {
 
         final ArgumentCaptor<ITable> argument = ArgumentCaptor.forClass(ITable.class);
 
-        final Filtered filtered = new Filtered(innerMatcher, expectedTable);
+        final Filtered filtered = Filtered.filtered(innerMatcher, expectedTable);
 
         filtered.matches(actualTable);
 

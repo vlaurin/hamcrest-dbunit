@@ -2,6 +2,8 @@ package eu.vlaurin.hamcrest.dbunit.matcher;
 
 import eu.vlaurin.hamcrest.dbunit.assertion.HamcrestDbUnitAssert;
 import eu.vlaurin.hamcrest.dbunit.assertion.HamcrestFailure;
+import eu.vlaurin.hamcrest.dbunit.matcher.decorator.filtered.Filterable;
+import eu.vlaurin.hamcrest.dbunit.matcher.decorator.filtered.Filtered;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.assertion.DbUnitAssert;
 import org.dbunit.dataset.Column;
@@ -9,7 +11,6 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.ITableMetaData;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
 /**
@@ -18,7 +19,7 @@ import org.hamcrest.TypeSafeMatcher;
  * @see ITable
  * @since 0.1.0
  */
-public final class IsEqual extends TypeSafeMatcher<ITable> {
+public final class IsEqual extends TypeSafeMatcher<ITable> implements Filterable {
 
     private static final DbUnitAssert DB_UNIT_ASSERT = new HamcrestDbUnitAssert();
     private static final String COLUMN_SEPARATOR = ", ";
@@ -111,7 +112,15 @@ public final class IsEqual extends TypeSafeMatcher<ITable> {
      * @param expectedTable
      *         Not null. The expected state of the tables compared
      */
-    public static Matcher<ITable> equalTo(ITable expectedTable) {
+    public static IsEqual equalTo(ITable expectedTable) {
         return new IsEqual(expectedTable);
+    }
+
+    /*
+        Decorators
+     */
+    @Override
+    public Filtered filtered() {
+        return Filtered.filtered(this, expectedTable);
     }
 }
