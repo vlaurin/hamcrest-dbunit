@@ -1,12 +1,12 @@
 package eu.vlaurin.hamcrest.dbunit.matcher.decorator.filtered;
 
 import eu.vlaurin.hamcrest.dbunit.DbUnitMatcherTest;
-import eu.vlaurin.hamcrest.dbunit.matcher.decorator.filtered.Filtered;
+import eu.vlaurin.hamcrest.dbunit.decorator.filtered.Filtered;
+import eu.vlaurin.hamcrest.dbunit.matcher.ComparatorMatcher;
 import org.dbunit.dataset.Column;
 import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -19,10 +19,10 @@ import java.util.List;
 
 import static eu.vlaurin.hamcrest.test.TestMatchers.*;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -33,7 +33,7 @@ public class FilteredTest extends DbUnitMatcherTest {
     private static final String DATASET = "FilteredTest.dataset.xml";
     private static final String ACTUAL_TABLE = "actual_user_table";
     private static final String EXPECTED_TABLE = "expected_user_table";
-    private Matcher<ITable> innerMatcher;
+    private ComparatorMatcher<ITable> innerMatcher;
 
     public FilteredTest() {
         super(DATASET);
@@ -41,7 +41,7 @@ public class FilteredTest extends DbUnitMatcherTest {
 
     @Before
     public void setUp() {
-        innerMatcher = mock(Matcher.class);
+        innerMatcher = mock(ComparatorMatcher.class);
         when(innerMatcher.matches(any())).thenReturn(false);
         doAnswer(new Answer<Void>() {
             @Override
@@ -63,18 +63,18 @@ public class FilteredTest extends DbUnitMatcherTest {
 
     @Test
     public void isNullSafe() {
-        assertThat(Filtered.filtered(innerMatcher, mock(ITable.class)), is(nullSafe()));
+        assertThat(Filtered.filtered(innerMatcher, getTable(EXPECTED_TABLE)), is(nullSafe()));
     }
 
     @Test
     public void isUnknownTypeSafe() {
-        assertThat(Filtered.filtered(innerMatcher, mock(ITable.class)), is(unknownTypeSafe()));
+        assertThat(Filtered.filtered(innerMatcher, getTable(EXPECTED_TABLE)), is(unknownTypeSafe()));
     }
 
     @Test
     public void decoratesInnerMatcher() {
-        final Filtered filtered = Filtered.filtered(innerMatcher, null);
-        assertThat(filtered.getMatcher(), sameInstance(innerMatcher));
+        final Filtered filtered = Filtered.filtered(innerMatcher, getTable(EXPECTED_TABLE));
+        assertThat(innerMatcher, sameInstance(filtered.getMatcher()));
     }
 
     @Test
@@ -84,19 +84,19 @@ public class FilteredTest extends DbUnitMatcherTest {
         final Filtered filtered = Filtered.filtered(innerMatcher, expectedTable);
 
         assertThat(filtered.matches(actualTable), is(false));
-        verify(innerMatcher).matches(any());
+        verify(innerMatcher).matches(Mockito.any(ITable.class), Mockito.any(ITable.class));
     }
 
     @Test
     public void successfulInnerMatcherCausesMatcherToSucceed() {
         final ITable actualTable = getTable(ACTUAL_TABLE);
         final ITable expectedTable = getTable(EXPECTED_TABLE);
-        final Matcher<ITable> successfulMatcher = mock(Matcher.class);
-        when(successfulMatcher.matches(any())).thenReturn(true);
+        final ComparatorMatcher<ITable> successfulMatcher = mock(ComparatorMatcher.class);
+        when(successfulMatcher.matches(Mockito.any(ITable.class), Mockito.any(ITable.class))).thenReturn(true);
         final Filtered filtered = Filtered.filtered(successfulMatcher, expectedTable);
 
         assertThat(filtered.matches(actualTable), is(true));
-        verify(successfulMatcher).matches(any());
+        verify(successfulMatcher).matches(Mockito.any(ITable.class), Mockito.any(ITable.class));
     }
 
     @Test
@@ -119,19 +119,40 @@ public class FilteredTest extends DbUnitMatcherTest {
     }
 
     @Test
-    public void columnsAreExcludedFromComparison() throws Exception {
+    public void columnsAreExcludedFromComparisonBasedOnExpectedTable() throws Exception {
         final ITable actualTable = getTable(ACTUAL_TABLE);
-        assumeThat(getColumnNames(actualTable), contains("id", "created_at", "username", "email"));
+        assumeThat(getColumnNames(actualTable), contains("id", "created_at", "username", "name", "email"));
         final ITable expectedTable = getTable(EXPECTED_TABLE);
-
-        final ArgumentCaptor<ITable> argument = ArgumentCaptor.forClass(ITable.class);
+        assumeThat(getColumnNames(expectedTable), contains("username", "name", "email"));
 
         final Filtered filtered = Filtered.filtered(innerMatcher, expectedTable);
 
         filtered.matches(actualTable);
 
-        verify(innerMatcher).matches(argument.capture());
-        assertThat(getColumnNames(argument.getValue()), contains("username", "email"));
+        final ArgumentCaptor<ITable> expectedCaptor = ArgumentCaptor.forClass(ITable.class);
+        final ArgumentCaptor<ITable> actualCaptor = ArgumentCaptor.forClass(ITable.class);
+        verify(innerMatcher).matches(expectedCaptor.capture(), actualCaptor.capture());
+        assertThat(getColumnNames(expectedCaptor.getValue()), contains("username", "name", "email"));
+        assertThat(getColumnNames(actualCaptor.getValue()), contains("username", "name", "email"));
+    }
+
+    @Test
+    public void columnsAreExcludedFromComparisonBasedOnListProvided() throws Exception {
+        final ITable actualTable = getTable(ACTUAL_TABLE);
+        assumeThat(getColumnNames(actualTable), contains("id", "created_at", "username", "name", "email"));
+        final ITable expectedTable = getTable(EXPECTED_TABLE);
+        assumeThat(getColumnNames(expectedTable), contains("username", "name", "email"));
+
+        final Filtered filtered = Filtered.filtered(innerMatcher, expectedTable, new String[]{"username", "email"});
+
+        filtered.matches(actualTable);
+
+        final ArgumentCaptor<ITable> expectedCaptor = ArgumentCaptor.forClass(ITable.class);
+        final ArgumentCaptor<ITable> actualCaptor = ArgumentCaptor.forClass(ITable.class);
+        verify(innerMatcher).matches(expectedCaptor.capture(), actualCaptor.capture());
+        assertThat(getColumnNames(expectedTable), contains("username", "name", "email"));
+        assertThat(getColumnNames(expectedCaptor.getValue()), contains("username", "email"));
+        assertThat(getColumnNames(actualCaptor.getValue()), contains("username", "email"));
     }
 
     protected List<String> getColumnNames(ITable table) throws DataSetException {

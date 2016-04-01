@@ -2,8 +2,8 @@ package eu.vlaurin.hamcrest.dbunit.matcher;
 
 import eu.vlaurin.hamcrest.dbunit.assertion.HamcrestDbUnitAssert;
 import eu.vlaurin.hamcrest.dbunit.assertion.HamcrestFailure;
-import eu.vlaurin.hamcrest.dbunit.matcher.decorator.filtered.Filterable;
-import eu.vlaurin.hamcrest.dbunit.matcher.decorator.filtered.Filtered;
+import eu.vlaurin.hamcrest.dbunit.decorator.filtered.Filterable;
+import eu.vlaurin.hamcrest.dbunit.decorator.filtered.Filtered;
 import org.dbunit.DatabaseUnitException;
 import org.dbunit.assertion.DbUnitAssert;
 import org.dbunit.dataset.Column;
@@ -11,7 +11,6 @@ import org.dbunit.dataset.DataSetException;
 import org.dbunit.dataset.ITable;
 import org.dbunit.dataset.ITableMetaData;
 import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
 
 /**
  * Matches DbUnit tables equal to the expected table (rows, columns and data).
@@ -19,23 +18,22 @@ import org.hamcrest.TypeSafeMatcher;
  * @see ITable
  * @since 0.1.0
  */
-public final class IsEqual extends TypeSafeMatcher<ITable> implements Filterable {
+public final class IsEqual extends ComparatorTypeSafeMatcher<ITable> implements Filterable {
 
     private static final DbUnitAssert DB_UNIT_ASSERT = new HamcrestDbUnitAssert();
     private static final String COLUMN_SEPARATOR = ", ";
 
-    private final ITable expectedTable;
     private HamcrestFailure hamcrestFailure;
 
-    public IsEqual(ITable expectedTable) {
-        if (null == expectedTable) {
-            throw new IllegalArgumentException("Non-null value required by IsEqual()");
+    private IsEqual(ITable expected) {
+        super(expected);
+        if (null == expected) {
+            throw new IllegalArgumentException("Non-null expected table required by IsEqual()");
         }
-        this.expectedTable = expectedTable;
     }
 
     @Override
-    protected boolean matchesSafely(ITable actualTable) {
+    protected boolean matchesSafely(ITable expectedTable, ITable actualTable) {
         Boolean matches = true;
 
         try {
@@ -54,22 +52,22 @@ public final class IsEqual extends TypeSafeMatcher<ITable> implements Filterable
     protected void describeMismatchSafely(ITable actualTable, Description mismatchDescription) {
         if (null != hamcrestFailure) {
             mismatchDescription.appendText(hamcrestFailure.getMessage())
-                               .appendText(" was: ")
-                               .appendValue(hamcrestFailure.getActual());
+                    .appendText(" was: ")
+                    .appendValue(hamcrestFailure.getActual());
         } else {
             mismatchDescription.appendText("table: ")
-                               .appendText(describeTable(actualTable));
+                    .appendText(describeTable(actualTable));
         }
     }
 
     public void describeTo(Description description) {
         if (null != hamcrestFailure) {
             description.appendText(hamcrestFailure.getMessage())
-                       .appendText(" is: ")
-                       .appendValue(hamcrestFailure.getExpected());
+                    .appendText(" is: ")
+                    .appendValue(hamcrestFailure.getExpected());
         } else {
             description.appendText("table: ")
-                       .appendText(describeTable(expectedTable));
+                    .appendText(describeTable(getExpected()));
         }
     }
 
@@ -79,15 +77,15 @@ public final class IsEqual extends TypeSafeMatcher<ITable> implements Filterable
         if (null != expectedTable) {
             final ITableMetaData tableMetaData = expectedTable.getTableMetaData();
             description.append("name=")
-                       .append(tableMetaData.getTableName())
-                       .append(", rows=")
-                       .append(expectedTable.getRowCount())
-                       .append(", columns=[");
+                    .append(tableMetaData.getTableName())
+                    .append(", rows=")
+                    .append(expectedTable.getRowCount())
+                    .append(", columns=[");
             try {
                 String separator = "";
                 for (Column column : tableMetaData.getColumns()) {
                     description.append(separator)
-                               .append(column.getColumnName());
+                            .append(column.getColumnName());
                     separator = COLUMN_SEPARATOR;
                 }
 
@@ -119,8 +117,38 @@ public final class IsEqual extends TypeSafeMatcher<ITable> implements Filterable
     /*
         Decorators
      */
+
+    /**
+     * Creates a {@link Filtered} matcher decorator of {@link ITable} that only includes in the comparison the <strong>columns of the expected table</strong>.
+     * <pre>
+     *     ITable actualTable = ...;
+     *     ITable expectedTable = ...;
+     *
+     *     assertThat(actualTable, equalTo(expectedTable).filtered());
+     * </pre>
+     *
+     * @return current matcher decorated with {@link Filtered}
+     */
     @Override
     public Filtered filtered() {
-        return Filtered.filtered(this, expectedTable);
+        return Filtered.filtered(this, getExpected());
+    }
+
+    /**
+     * Creates a {@link Filtered} matcher decorator of {@link ITable} that only includes in the comparison the <strong>columns specified</strong>.
+     * <pre>
+     *     ITable actualTable = ...;
+     *     ITable expectedTable = ...;
+     *
+     *     assertThat(actualTable, equalTo(expectedTable).filtered("col1", "col2"));
+     * </pre>
+     *
+     * @param columns
+     *         Names of the columns to include in the comparison
+     * @return current matcher decorated with {@link Filtered}
+     */
+    @Override
+    public Filtered filtered(String... columns) {
+        return Filtered.filtered(this, getExpected(), columns);
     }
 }

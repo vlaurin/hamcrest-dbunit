@@ -1,4 +1,4 @@
-package eu.vlaurin.hamcrest.dbunit.matcher.decorator;
+package eu.vlaurin.hamcrest.dbunit.decorator;
 
 import org.hamcrest.Matcher;
 

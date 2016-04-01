@@ -1,7 +1,7 @@
 package eu.vlaurin.hamcrest.dbunit.matcher;
 
 import eu.vlaurin.hamcrest.dbunit.DbUnitMatcherTest;
-import eu.vlaurin.hamcrest.dbunit.matcher.decorator.filtered.Filtered;
+import eu.vlaurin.hamcrest.dbunit.decorator.filtered.Filtered;
 import org.dbunit.dataset.ITable;
 import org.hamcrest.Matcher;
 import org.junit.Test;
@@ -10,8 +10,7 @@ import static eu.vlaurin.hamcrest.dbunit.DbUnitMatchers.equalTo;
 import static eu.vlaurin.hamcrest.test.TestMatchers.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 
 /**
